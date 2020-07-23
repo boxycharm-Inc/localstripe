@@ -266,7 +266,6 @@ class Card(StripeObject):
             address_state = source.get('address_state', None)
             address_zip = source.get('address_zip', None)
             name = source.get('name', None)
-            iin = ''.join(random.choice('0123456789') for _ in range(6))
             assert type(number) is str and len(number) == 16
             assert type(exp_month) is int
             assert exp_month >= 1 and exp_month <= 12
@@ -302,7 +301,9 @@ class Card(StripeObject):
         self.fingerprint = fingerprint(self._card_number)
         self.funding = 'credit'
         self.name = name
-        self.iin = iin
+        # Custom BoxyCharm added fields start here
+        self.iin = ''.join(random.choice('0123456789') for _ in range(6))
+        # Custom BoxyCharm added fields end here
         self.tokenization_method = None
 
         self.customer = None
