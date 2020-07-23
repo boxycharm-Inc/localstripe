@@ -302,6 +302,7 @@ class Card(StripeObject):
         self.fingerprint = fingerprint(self._card_number)
         self.funding = 'credit'
         self.name = name
+        self.iin = iin
         self.tokenization_method = None
 
         self.customer = None
