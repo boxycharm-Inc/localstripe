@@ -371,7 +371,7 @@ class Charge(StripeObject):
         self.description = description
         self.invoice = None
         self.metadata = metadata or {}
-        self.status = 'pending'
+        self.status = 'succeeded'
         self.receipt_email = None
         self.receipt_number = None
         self.payment_method = source.id
