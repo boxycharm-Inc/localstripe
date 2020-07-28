@@ -376,6 +376,7 @@ class Charge(StripeObject):
         self.receipt_number = None
         self.payment_method = source.id
         self.failure_code = None
+        self.source = source
         self.failure_message = None
         self.captured = capture
 
