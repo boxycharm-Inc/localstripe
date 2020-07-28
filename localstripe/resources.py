@@ -301,6 +301,9 @@ class Card(StripeObject):
         self.fingerprint = fingerprint(self._card_number)
         self.funding = 'credit'
         self.name = name
+        # Custom BoxyCharm added fields start here
+        self.iin = ''.join(random.choice('0123456789') for _ in range(6))
+        # Custom BoxyCharm added fields end here
         self.tokenization_method = None
 
         self.customer = None
@@ -368,11 +371,12 @@ class Charge(StripeObject):
         self.description = description
         self.invoice = None
         self.metadata = metadata or {}
-        self.status = 'pending'
+        self.status = 'succeeded'
         self.receipt_email = None
         self.receipt_number = None
         self.payment_method = source.id
         self.failure_code = None
+        self.source = source
         self.failure_message = None
         self.captured = capture
 
