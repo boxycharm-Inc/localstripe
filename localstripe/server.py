@@ -201,7 +201,12 @@ def api_create(cls, url):
         data = await get_post_data(request)
         data = data or {}
         expand = data.pop('expand', None)
-        return json_response(cls._api_create(**data)._export(expand=expand))
+        apidata = cls._api_create(**data)
+        try:
+            jsonobj = apidata._export(expand=expand)
+            return json_response(jsonobj)
+        except Exception as exception:
+            return json_response(apidata)
     return f
 
 
