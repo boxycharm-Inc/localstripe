@@ -348,6 +348,8 @@ class Charge(StripeObject):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
 
+        global amount
+        global capture
         amount = try_convert_to_int(amount)
         capture = try_convert_to_bool(capture)
         try:
@@ -443,7 +445,7 @@ class Charge(StripeObject):
 
         # return mock response for existing customer where card or customer data does not exists
         if mock_response is True:
-            return mock_source_object(2300,False)
+            return mock_source_object(amount,capture)
 
         # for successful pre-auth, return unpaid charge
         if not obj.captured and obj._authorized:
@@ -1940,7 +1942,7 @@ class PaymentMethod(StripeObject):
                 card = Card._api_retrieve(id)
                 return card
             except Exception as exception:
-                return  mock_source_object(2300,False)
+                return  mock_source_object(100,False)
         elif id.startswith('src_'):
             return Source._api_retrieve(id)
 
