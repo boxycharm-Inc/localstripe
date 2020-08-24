@@ -22,6 +22,9 @@ import random
 import re
 import string
 import time
+import json
+import logging
+
 
 from dateutil.relativedelta import relativedelta
 
@@ -66,6 +69,19 @@ store = Store()
 def random_id(n):
     return ''.join(random.choice(string.ascii_letters + string.digits)
                    for i in range(n))
+
+def random_num(n):
+    return ''.join(random.choice(string.digits)
+                   for i in range(n))
+
+def mock_source_object(amount,capture):
+        id = "ch_" + random_id(24)
+        card = "card_" + random_id(24)
+        customer_id = "cus_" + random_id(14)
+        fingerprint = random_id(16)
+        last4 = random_num(16)
+        curlResponse = {"id": id,"object": "charge","amount": try_convert_to_int(amount),"amount_refunded": 0,"application": None,"application_fee": None, "application_fee_amount": None,"balance_transaction": None,"billing_details": { "address": { "city": "Buffalo", "country": "US","line1": "840 aero drive", "line2": "", "postal_code": "14225", "state": "43" }, "email": None, "name": "Boxy Charm", "phone": None }, "calculated_statement_descriptor": "BOXYCHARM*", "captured": try_convert_to_bool(capture), "created": int(time.time()), "currency": "usd", "customer": customer_id, "description": None, "destination": None, "dispute": None, "disputed": False, "failure_code": None, "failure_message": None, "fraud_details": { }, "invoice": None, "livemode": False, "metadata": { }, "on_behalf_of": None, "order": None, "outcome": { "network_status": "approved_by_network", "reason": None, "risk_level": "normal", "risk_score": 19, "seller_message": "Payment complete.", "type": "authorized" }, "paid": True, "payment_intent": None, "payment_method": card, "payment_method_details": { "card": { "brand": "visa", "checks": { "address_line1_check": "pass", "address_postal_code_check": "pass", "cvc_check": None }, "country": "US", "exp_month": 12, "exp_year": 2024, "fingerprint": fingerprint, "funding": "credit", "installments": None, "last4": last4, "network": "visa", "three_d_secure": None, "wallet": None }, "type": "card" }, "receipt_email": None, "receipt_number": None, "receipt_url": None, "refunded": False, "refunds": { "object": "list", "data": [], "has_more": False, "total_count": 0, "url": "/v1/charges/ch_1HHtg2K8VCYMeauJeWq3PO3p/refunds" }, "review": None, "shipping": None, "source": { "id": card, "object": "card", "address_city": "Buffalo", "address_country": "US", "address_line1": "840 aero drive", "address_line1_check": "pass", "address_line2": "", "address_state": "43", "address_zip": "14225", "address_zip_check": "pass", "brand": "Visa", "country": "US", "customer": customer_id, "cvc_check": None, "dynamic_last4": None, "exp_month": 3, "exp_year": 2022, "fingerprint": fingerprint, "funding": "credit", "last4": "4242", "metadata": { }, "name": "Boxy Charm", "tokenization_method": None }, "source_transfer": None, "statement_descriptor": "Boxycharm*", "statement_descriptor_suffix": None, "status": "succeeded", "transfer_data": None, "transfer_group": None}
+        return json.loads(json.dumps(curlResponse))
 
 
 def fingerprint(s: str):
@@ -302,7 +318,7 @@ class Card(StripeObject):
         self.funding = 'credit'
         self.name = name
         # Custom BoxyCharm added fields start here
-        self.iin = ''.join(random.choice('0123456789') for _ in range(6))
+        self.iin = random_num(6)
         # Custom BoxyCharm added fields end here
         self.tokenization_method = None
 
@@ -336,7 +352,7 @@ class Charge(StripeObject):
         capture = try_convert_to_bool(capture)
         try:
             assert type(amount) is int and amount >= 0
-            assert type(currency) is str and currency
+            assert type(currency) is str
             if description is not None:
                 assert type(description) is str
             if customer is not None:
@@ -360,25 +376,34 @@ class Charge(StripeObject):
         if customer is None:
             customer = source.customer
 
-        # All exceptions must be raised before this point.
-        super().__init__()
+        global mock_response
+        mock_response = False
+        #Boxycharm Custom code to see if customer exists and set the variable mock_response to True or False and do early return in _api_retrieve
+        try:
+            customer_obj = Customer._api_retrieve(customer)
+        except Exception as exception:
+            mock_response = True
 
-        self._authorized = not source._charging_is_declined()
+        if mock_response is False:
+            # All exceptions must be raised before this point.
+            super().__init__()
 
-        self.amount = amount
-        self.currency = currency
-        self.customer = customer
-        self.description = description
-        self.invoice = None
-        self.metadata = metadata or {}
-        self.status = 'succeeded'
-        self.receipt_email = None
-        self.receipt_number = None
-        self.payment_method = source.id
-        self.failure_code = None
-        self.source = source
-        self.failure_message = None
-        self.captured = capture
+            self._authorized = not source._charging_is_declined()
+
+            self.amount = amount
+            self.currency = currency
+            self.customer = customer
+            self.description = description
+            self.invoice = None
+            self.metadata = metadata or {}
+            self.status = 'succeeded'
+            self.receipt_email = None
+            self.receipt_number = None
+            self.payment_method = source.id
+            self.failure_code = None
+            self.source = source
+            self.failure_message = None
+            self.captured = capture
 
     def _trigger_payment(self, on_success=None, on_failure_now=None,
                          on_failure_later=None):
@@ -415,6 +440,10 @@ class Charge(StripeObject):
     @classmethod
     def _api_create(cls, **data):
         obj = super()._api_create(**data)
+
+        # return mock response for existing customer where card or customer data does not exists
+        if mock_response is True:
+            return mock_source_object(2300,False)
 
         # for successful pre-auth, return unpaid charge
         if not obj.captured and obj._authorized:
@@ -1907,7 +1936,11 @@ class PaymentMethod(StripeObject):
         # You can retrieve all saved compatible payment instruments through the
         # Payment Methods API.
         if id.startswith('card_'):
-            return Card._api_retrieve(id)
+            try:
+                card = Card._api_retrieve(id)
+                return card
+            except Exception as exception:
+                return  mock_source_object(2300,False)
         elif id.startswith('src_'):
             return Source._api_retrieve(id)
 
