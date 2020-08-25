@@ -215,7 +215,12 @@ def api_retrieve(cls, url):
         id = request.match_info['id']
         data = unflatten_data(request.query)
         expand = data.pop('expand', None)
-        return json_response(cls._api_retrieve(id)._export(expand=expand))
+        apidata = cls._api_retrieve(id)
+        try:
+            jsonobj = apidata._export(expand=expand)
+            return json_response(jsonobj)
+        except Exception as exception:
+            return json_response(apidata)
     return f
 
 
@@ -226,8 +231,7 @@ def api_update(cls, url):
         if not data:
             raise UserError(400, 'Bad request')
         expand = data.pop('expand', None)
-        return json_response(cls._api_update(id, **data)._export(
-            expand=expand))
+        return json_response(cls._api_update(id, **data)._export(expand=expand))
     return f
 
 
@@ -259,7 +263,10 @@ def api_extra(func, url):
         if 'subscription_id' in request.match_info:
             data['subscription_id'] = request.match_info['subscription_id']
         expand = data.pop('expand', None)
-        return json_response(func(**data)._export(expand=expand))
+        try:
+            return json_response(func(**data)._export(expand=expand))
+        except Exception as exception:
+            return json_response(func(**data))
     return f
 
 
