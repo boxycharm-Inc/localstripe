@@ -348,8 +348,6 @@ class Charge(StripeObject):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
 
-        global amount
-        global capture
         amount = try_convert_to_int(amount)
         capture = try_convert_to_bool(capture)
         try:
@@ -443,6 +441,9 @@ class Charge(StripeObject):
     def _api_create(cls, **data):
         obj = super()._api_create(**data)
 
+        amount = try_convert_to_int(data.get('amount','100'))
+        capture = try_convert_to_bool(data.get('capture','false'))
+
         # return mock response for existing customer where card or customer data does not exists
         if mock_response is True:
             return mock_source_object(amount,capture)
@@ -466,6 +467,10 @@ class Charge(StripeObject):
     def _api_capture(cls, id, amount=None, **kwargs):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
+
+        # return mock response for existing customer where card or customer data does not exists
+        if mock_response is True:
+            return mock_source_object(amount,True)
 
         try:
             assert type(id) is str and id.startswith('ch_')
