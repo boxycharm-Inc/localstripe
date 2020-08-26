@@ -231,7 +231,12 @@ def api_update(cls, url):
         if not data:
             raise UserError(400, 'Bad request')
         expand = data.pop('expand', None)
-        return json_response(cls._api_update(id, **data)._export(expand=expand))
+        apidata = cls._api_update(id, **data)
+        try:
+            jsonobj = apidata._export(expand=expand)
+            return json_response(jsonobj)
+        except Exception as exception:
+            return json_response(apidata)
     return f
 
 
@@ -247,8 +252,12 @@ def api_list_all(cls, url):
     def f(request):
         data = unflatten_data(request.query)
         expand = data.pop('expand', None)
-        return json_response(cls._api_list_all(url, **data)
-                             ._export(expand=expand))
+        apidata = cls._api_list_all(url, **data)
+        try:
+            jsonobj = apidata._export(expand=expand)
+            return json_response(jsonobj)
+        except Exception as exception:
+            return json_response(apidata)
     return f
 
 
