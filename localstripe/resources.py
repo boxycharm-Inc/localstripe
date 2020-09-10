@@ -440,6 +440,9 @@ class Charge(StripeObject):
     @classmethod
     def _api_create(cls, **data):
         obj = super()._api_create(**data)
+        
+        #sleep for 500ms for every charge create
+        time.sleep(0.5)
 
         amount = try_convert_to_int(data.get('amount','100'))
         capture = try_convert_to_bool(data.get('capture','false'))
@@ -467,7 +470,10 @@ class Charge(StripeObject):
     def _api_capture(cls, id, amount=None, **kwargs):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
-
+        
+        #sleep for 300ms for every capture
+        time.sleep(0.3)
+        
         # return mock response for existing customer where card or customer data does not exists
         if mock_response is True:
             return mock_source_object(amount,True)
