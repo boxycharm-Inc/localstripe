@@ -1965,7 +1965,7 @@ class PaymentMethod(StripeObject):
                 card = Card._api_retrieve(id)
                 return card
             except Exception as exception:
-                return  mock_source_object(100,True)
+                return  mock_source_object(100,False)
         elif id.startswith('src_'):
             return Source._api_retrieve(id)
 
