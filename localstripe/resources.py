@@ -365,10 +365,16 @@ class Charge(StripeObject):
         except AssertionError:
             raise UserError(400, 'Bad request')
 
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('Charge __init__ %s ' %(source))
+        
         if source is None:
             customer_obj = Customer._api_retrieve(customer)
+            logger.info('source is None %s ' %(customer_obj))
             source = customer_obj._get_default_payment_method_or_source()
+            logger.info('_get_default_payment_method_or_source %s ' %(source))
             if source is None:
+                logger.info('This customer has no payment method')
                 raise UserError(404, 'This customer has no payment method')
         else:
             source = PaymentMethod._api_retrieve(source)
@@ -440,10 +446,11 @@ class Charge(StripeObject):
     @classmethod
     def _api_create(cls, **data):
         obj = super()._api_create(**data)
-        
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('Charge._api_create ')
         #sleep for 500ms for every charge create
         time.sleep(0.5)
-
+        
         amount = try_convert_to_int(data.get('amount','100'))
         capture = try_convert_to_bool(data.get('capture','false'))
 
@@ -471,6 +478,8 @@ class Charge(StripeObject):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
         
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('Charge._api_capture ')
         #sleep for 300ms for every capture
         time.sleep(0.3)
         

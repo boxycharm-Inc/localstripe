@@ -202,6 +202,8 @@ def api_create(cls, url):
         data = data or {}
         expand = data.pop('expand', None)
         apidata = cls._api_create(**data)
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('api_create apidata %s ' %(apidata))
         try:
             jsonobj = apidata._export(expand=expand)
             return json_response(jsonobj)
@@ -216,6 +218,8 @@ def api_retrieve(cls, url):
         data = unflatten_data(request.query)
         expand = data.pop('expand', None)
         apidata = cls._api_retrieve(id)
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('api_retrieve apidata %s ' %(apidata))
         try:
             jsonobj = apidata._export(expand=expand)
             return json_response(jsonobj)
@@ -228,10 +232,13 @@ def api_update(cls, url):
     async def f(request):
         id = request.match_info['id']
         data = await get_post_data(request)
+        logger = logging.getLogger('aiohttp.access')
         if not data:
+            logger.info('api_update Bad request')
             raise UserError(400, 'Bad request')
         expand = data.pop('expand', None)
         apidata = cls._api_update(id, **data)
+        logger.info('api_update apidata %s ' %(apidata))
         try:
             jsonobj = apidata._export(expand=expand)
             return json_response(jsonobj)
@@ -253,6 +260,8 @@ def api_list_all(cls, url):
         data = unflatten_data(request.query)
         expand = data.pop('expand', None)
         apidata = cls._api_list_all(url, **data)
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('api_list_all apidata %s ' %(apidata))
         try:
             jsonobj = apidata._export(expand=expand)
             return json_response(jsonobj)
