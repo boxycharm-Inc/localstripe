@@ -449,7 +449,7 @@ class Charge(StripeObject):
         obj = super()._api_create(**data)
         logger = logging.getLogger('aiohttp.access')
         logger.info('Charge._api_create ')
-        logger.info('_api_create data %s ' %(**data))
+        logger.info(**data)
         #sleep for 500ms for every charge create
         time.sleep(0.5)
         
@@ -482,7 +482,7 @@ class Charge(StripeObject):
         
         logger = logging.getLogger('aiohttp.access')
         logger.info('Charge._api_capture ')
-        logger.info('_api_capture kwargs %s ' %(**kwargs))
+        logger.info(**kwargs)
         #sleep for 300ms for every capture
         time.sleep(0.3)
         
