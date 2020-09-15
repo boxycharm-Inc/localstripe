@@ -1,9 +1,4 @@
-on:
-  workflow_dispatch:
-    inputs:
-      branch_name:
-        description: GitHub Branch Name
-        required: true
+on: [workflow_dispatch]
 
 name: Manual build LOCALSTRIPE Docker Image and Deploy to ECS Service
 
@@ -31,9 +26,6 @@ jobs:
       uses: aws-actions/aws-codebuild-run-build@v1.0.3
       with:
         project-name: localstripe-gh-action
-        env-vars-for-codebuild: BRANCH_NAME
-      env:
-        BRANCH_NAME: ${{ github.event.inputs.branch_name }}
 
     - name: Fill in new Image ID to TaskDef 
       id: task-def
