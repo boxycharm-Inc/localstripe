@@ -161,8 +161,8 @@ class StripeObject(object):
         obj = store.get(cls.object + ':' + id, None)
 
         if obj is None:
-            #raise UserError(404, 'Not Found')
-            obj = mock_source_object(100, False)
+            raise UserError(404, 'Not Found')
+            
 
         return obj
 
@@ -510,10 +510,9 @@ class Charge(StripeObject):
         time.sleep(0.3)
         logger.info('Charge.mock_response %s ' %(mock_response))
         # return mock response for existing customer where card or customer data does not exists
-        #if mock_response is True:
-            #return mock_source_object(amount,True)
+        if mock_response is True:
+            return mock_source_object(amount,True)
         
-        return mock_source_object(amount,True)
         
         logger.info('Charge.id %s ' %(id))
         logger.info('Charge.amount %s ' %(amount))
@@ -524,7 +523,9 @@ class Charge(StripeObject):
         
         try:
             obj = cls._api_retrieve(id)
+            logger.info('Charge.try')
         except AssertionError:
+            logger.info('Charge.except')
             return mock_source_object(amount,True)
         
 
