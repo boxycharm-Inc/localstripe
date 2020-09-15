@@ -10,7 +10,12 @@ phases:
         - echo Logging into AWS ECR
         - aws --version
         - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-        - IMAGE_TAG=$(echo $GITHUB_REF | cut -d/ -f3-)
+        - |
+          if [[ -n "${BRANCH_NAME}"  ]]; then
+              IMAGE_TAG=${BRANCH_NAME}
+          else
+              IMAGE_TAG=$(echo $GITHUB_REF | cut -d/ -f3-)
+          fi
         - IMAGE_URI="${ECR_REPO_URI}":"${IMAGE_TAG}"
 
   build:
