@@ -26,6 +26,7 @@ jobs:
 
     - name: Build the Image
       id: build-image
+      continue-on-error: true
       uses: aws-actions/aws-codebuild-run-build@v1.0.3
       with:
         project-name: localstripe-gh-action
