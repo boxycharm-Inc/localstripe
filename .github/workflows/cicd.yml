@@ -37,7 +37,7 @@ jobs:
       with:
         task-definition: taskdef.json
         container-name: localstripe
-        image: ${{ steps.build-image.outputs.image }}
+        image: "910496926562.dkr.ecr.us-east-1.amazonaws.com/localstripe:master"
 
     - name: Deploying the Docker Image to AWS ECS
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
