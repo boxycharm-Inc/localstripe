@@ -524,7 +524,7 @@ class Charge(StripeObject):
         try:
             obj = cls._api_retrieve(id)
             logger.info('Charge.try')
-        except AssertionError:
+        except UserError as error:
             logger.info('Charge.except')
             return mock_source_object(amount,True)
         
