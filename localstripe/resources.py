@@ -518,8 +518,12 @@ class Charge(StripeObject):
             assert type(id) is str and id.startswith('ch_')
         except AssertionError:
             raise UserError(400, 'Bad request')
-
-        obj = cls._api_retrieve(id)
+        
+        try:
+            obj = cls._api_retrieve(id)
+        except AssertionError:
+            return mock_source_object(amount,True)
+        
 
         if amount is None:
             amount = obj.amount
