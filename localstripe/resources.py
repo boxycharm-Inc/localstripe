@@ -24,6 +24,8 @@ import string
 import time
 import json
 import logging
+import sys, traceback
+
 
 
 from dateutil.relativedelta import relativedelta
@@ -448,8 +450,16 @@ class Charge(StripeObject):
     def _api_create(cls, **data):
         obj = super()._api_create(**data)
         logger = logging.getLogger('aiohttp.access')
-        logger.info('Charge._api_create ')
-        logger.info(**data)
+        logger.info('Charge._api_create %s ' %(data))
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        
+        logger.info("*** extract_tb:")
+        logger.info(repr(traceback.extract_tb(exc_traceback)))
+        logger.info("*** format_tb:")
+        logger.info(repr(traceback.format_tb(exc_traceback)))
+        
+        
+        
         #sleep for 500ms for every charge create
         time.sleep(0.5)
         
@@ -481,15 +491,29 @@ class Charge(StripeObject):
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
         
         logger = logging.getLogger('aiohttp.access')
-        logger.info('Charge._api_capture ')
-        logger.info(**kwargs)
+        logger.info('Charge._api_capture %s ' %(kwargs))
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        
+        logger.info("*** extract_tb:")
+        logger.info(repr(traceback.extract_tb(exc_traceback)))
+        logger.info("*** format_tb:")
+        logger.info(repr(traceback.format_tb(exc_traceback)))
+        
+
+        
+        logger.info('Charge.cls %s ' %(cls))
+        logger.info('Charge.id %s ' %(id))
+        logger.info('Charge.amount %s ' %(amount))
+       
         #sleep for 300ms for every capture
         time.sleep(0.3)
-        
+        logger.info('Charge.mock_response %s ' %(mock_response))
         # return mock response for existing customer where card or customer data does not exists
         if mock_response is True:
             return mock_source_object(amount,True)
-
+        
+        logger.info('Charge.id %s ' %(id))
+        logger.info('Charge.amount %s ' %(amount))
         try:
             assert type(id) is str and id.startswith('ch_')
         except AssertionError:

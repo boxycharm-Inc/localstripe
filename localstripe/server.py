@@ -21,6 +21,8 @@ import logging
 import os.path
 import re
 import socket
+import sys, traceback
+
 
 from aiohttp import web
 
@@ -274,6 +276,8 @@ def api_extra(func, url):
     async def f(request):
         data = await get_post_data(request) or {}
         data.update(unflatten_data(request.query) or {})
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('api_extra data %s ' %(data))
         if 'id' in request.match_info:
             data['id'] = request.match_info['id']
         if 'source_id' in request.match_info:
