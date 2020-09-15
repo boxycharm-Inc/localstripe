@@ -5,11 +5,11 @@ on:
         description: GitHub Branch Name
         required: true
 
-name: Build LOCALSTRIPE Docker Image and Deploy to ECS Service
+name: Manual build LOCALSTRIPE Docker Image and Deploy to ECS Service
 
 jobs:
   deploy:
-    name: Deployment
+    name: Manual Deployment
     runs-on: ubuntu-latest
 
     steps:

@@ -3,11 +3,11 @@ on:
     branches:
       - master
 
-name: Build LOCALSTRIPE Docker Image and Deploy to ECS Service
+name: Automatic build LOCALSTRIPE Docker Image and Deploy to ECS Service
 
 jobs:
   deploy:
-    name: Deployment
+    name: Automated Deployment
     runs-on: ubuntu-latest
 
     steps:
