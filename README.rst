@@ -1,4 +1,4 @@
-localstripe
+localstripe.
 ===========
 
 *A fake but stateful Stripe server that you can run locally, for testing

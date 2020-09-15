@@ -1,0 +1,33 @@
+{
+  "executionRoleArn": "arn:aws:iam::910496926562:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/localstripe-task",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portMappings": [
+        {
+          "hostPort": 8420,
+          "protocol": "tcp",
+          "containerPort": 8420
+        }
+      ],
+      "image": "<IMAGE_NAME>",
+      "essential": true,
+      "name": "localstripe"
+    }
+  ],
+  "memory": "8192",
+  "taskRoleArn": null,
+  "family": "localstripe-task",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "cpu": "4096"
+}

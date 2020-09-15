@@ -1,0 +1,33 @@
+---
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+     docker: 19
+  pre_build:
+    commands:
+        - echo Logging into AWS ECR
+        - aws --version
+        - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+        - IMAGE_TAG=$(echo $GITHUB_REF | cut -d/ -f3-)
+        - IMAGE_URI="${ECR_REPO_URI}":"${IMAGE_TAG}"
+
+  build:
+    commands:
+        - echo CodeBuild started on `date`
+        - echo Building the Docker Image now...
+        - echo "${IMAGE_URI}"
+        - docker build -t "${IMAGE_URI}" .
+        - echo "::set-output name=image::${IMAGE_URI}"
+
+  post_build:
+    commands:
+        - echo CodeBuild finished successfully on `date`
+        - echo Pushing the Docker Image to ECR now...
+        - docker push "${IMAGE_URI}"
+        - printf '{"ImageURI":"%s:%s"}' ${ECR_REPO_URI} ${IMAGE_TAG} > imageDetail.json
+
+artifacts:
+  files:
+    - imageDetail.json
