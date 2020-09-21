@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 # Copyright 2017 Adrien Vergé
 #
@@ -197,6 +198,8 @@ app.on_response_prepare.append(add_cors_headers)
 
 
 def api_create(cls, url):
+    logger = logging.getLogger('aiohttp.access')
+    logger.info('server.api_create::  "%s" ' % (url))
     async def f(request):
         data = await get_post_data(request)
         data = data or {}
@@ -204,13 +207,17 @@ def api_create(cls, url):
         apidata = cls._api_create(**data)
         try:
             jsonobj = apidata._export(expand=expand)
+            logger.info('try api_create server.jsonobj :: "%s" ' % (jsonobj))
             return json_response(jsonobj)
         except Exception as exception:
+            logger.info('except api_create server.jsonobj :: "%s" ' % (json_response(apidata)))
             return json_response(apidata)
     return f
 
 
 def api_retrieve(cls, url):
+    logger = logging.getLogger('aiohttp.access')
+    logger.info('server.api_create::  "%s" ' % (url))
     def f(request):
         id = request.match_info['id']
         data = unflatten_data(request.query)
@@ -218,13 +225,17 @@ def api_retrieve(cls, url):
         apidata = cls._api_retrieve(id)
         try:
             jsonobj = apidata._export(expand=expand)
+            logger.info('try  api_retrieve server.jsonobj :: "%s" ' % (jsonobj))
             return json_response(jsonobj)
         except Exception as exception:
+            logger.info('except api_retrieve server.jsonobj :: "%s" ' % (json_response(apidata)))
             return json_response(apidata)
     return f
 
 
 def api_update(cls, url):
+    logger = logging.getLogger('aiohttp.access')
+    logger.info('server.api_update::  "%s" ' % (url))
     async def f(request):
         id = request.match_info['id']
         data = await get_post_data(request)
@@ -234,13 +245,17 @@ def api_update(cls, url):
         apidata = cls._api_update(id, **data)
         try:
             jsonobj = apidata._export(expand=expand)
+            logger.info('try api_update server.jsonobj :: "%s" ' % (jsonobj))
             return json_response(jsonobj)
         except Exception as exception:
+            logger.info('except api_update server.jsonobj :: "%s" ' % (json_response(apidata)))
             return json_response(apidata)
     return f
 
 
 def api_delete(cls, url):
+    logger = logging.getLogger('aiohttp.access')
+    logger.info('server.api_delete::  "%s" ' % (url))
     def f(request):
         id = request.match_info['id']
         ret = cls._api_delete(id)
@@ -249,19 +264,25 @@ def api_delete(cls, url):
 
 
 def api_list_all(cls, url):
+    logger = logging.getLogger('aiohttp.access')
+    logger.info('server.api_list_all::  "%s" ' % (url))
     def f(request):
         data = unflatten_data(request.query)
         expand = data.pop('expand', None)
         apidata = cls._api_list_all(url, **data)
         try:
             jsonobj = apidata._export(expand=expand)
+            logger.info('try api_list_all server.jsonobj :: "%s" ' % (jsonobj))
             return json_response(jsonobj)
         except Exception as exception:
+            logger.info('except api_list_all server.jsonobj :: "%s" ' % (json_response(apidata)))
             return json_response(apidata)
     return f
 
 
 def api_extra(func, url):
+    logger = logging.getLogger('aiohttp.access')
+    logger.info('server.api_extra::  "%s" ' % (url))
     async def f(request):
         data = await get_post_data(request) or {}
         data.update(unflatten_data(request.query) or {})
@@ -294,6 +315,8 @@ for cls in (Charge, Coupon, Customer, Event, Invoice, InvoiceItem,
             ('POST', '/v1/' + cls.object + 's/{id}', api_update),
             ('DELETE', '/v1/' + cls.object + 's/{id}', api_delete),
             ('GET', '/v1/' + cls.object + 's', api_list_all)):
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('server.method ::  "%s"  "%s" ' % (method,url))
         app.router.add_route(method, url, func(cls, url))
 
 

@@ -388,8 +388,14 @@ class Charge(StripeObject):
             # All exceptions must be raised before this point.
             super().__init__()
 
-            self._authorized = not source._charging_is_declined()
-
+            #self._authorized = not source._charging_is_declined()
+            
+                
+            try:
+                self._authorized = not source._charging_is_declined()
+            except AssertionError:
+                self._authorized = True
+                
             self.amount = amount
             self.currency = currency
             self.customer = customer
@@ -441,8 +447,11 @@ class Charge(StripeObject):
     def _api_create(cls, **data):
         obj = super()._api_create(**data)
         
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('Charge._api_create "%s" ' % (data))
+        
         #sleep for 500ms for every charge create
-        time.sleep(0.5)
+        #time.sleep(0.5)
 
         amount = try_convert_to_int(data.get('amount','100'))
         capture = try_convert_to_bool(data.get('capture','false'))
@@ -463,19 +472,27 @@ class Charge(StripeObject):
             on_failure_now=on_failure,
             on_failure_later=on_failure
         )
-
+        
+        logger.info('Charge._api_create return obj "%s" ' % (obj))
+        #logger.info('Charge._api_create return obj json.dumps "%s" ' % (json.dumps(obj)))
+        #logger.info('Charge._api_create return obj json.loads "%s" ' % (json.loads(json.dumps(obj))))
         return obj
 
     @classmethod
     def _api_capture(cls, id, amount=None, **kwargs):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
+            
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('Charge._api_capture :: "%s" ' % (id))
+        logger.info('Charge._api_capture mock_response vvalue :: "%s" ' % (mock_response))
         
         #sleep for 300ms for every capture
-        time.sleep(0.3)
+        #time.sleep(0.3)
         
         # return mock response for existing customer where card or customer data does not exists
         if mock_response is True:
+            logger.info('Charge._api_capture mock_response return :: "%s" ' % (mock_source_object(amount,True)))    
             return mock_source_object(amount,True)
 
         try:
@@ -491,6 +508,8 @@ class Charge(StripeObject):
         try:
             obj = cls._api_retrieve(id)
         except UserError:
+            logger.info('Charge._api_capture UserError')
+            logger.info('Charge._api_capture mock_response except :: "%s" ' % (mock_source_object(amount,True)))    
             return mock_source_object(amount,True)
         
 
@@ -508,6 +527,11 @@ class Charge(StripeObject):
                 Refund(obj.id, refunded)
 
         obj._trigger_payment(on_success)
+        
+        logger.info('Charge._api_capture return obj "%s" ' % (obj))
+        #jsonStr = json.dumps(obj.__dict__)
+        #logger.info('Charge._api_capture return obj jsonStr "%s" ' % (jsonStr))
+        #logger.info('Charge._api_capture return obj json.loads "%s" ' % (json.loads(json.dumps(obj))))
         return obj
 
     @property
@@ -1954,9 +1978,14 @@ class PaymentMethod(StripeObject):
         # https://stripe.com/docs/payments/payment-methods#transitioning
         # You can retrieve all saved compatible payment instruments through the
         # Payment Methods API.
+        logger = logging.getLogger('aiohttp.access')
+        logger.info('PaymentMethod._api_retrieve "%s" ' % (id))
         if id.startswith('card_'):
             try:
                 card = Card._api_retrieve(id)
+                logger.info('PaymentMethod._api_retrieve card "%s" ' % (card))
+                #logger.info('PaymentMethod._api_retrieve card json.dumps "%s" ' % (json.dumps(card)))
+                #logger.info('PaymentMethod._api_retrieve card json.loads "%s" ' % (json.loads(json.dumps(card))))
                 return card
             except Exception as exception:
                 return  mock_source_object(100,False)
