@@ -121,7 +121,6 @@ def try_convert_to_float(arg):
 
 extra_apis = []
 
-
 class StripeObject(object):
     object = None
 
@@ -483,18 +482,12 @@ class Charge(StripeObject):
         except AssertionError:
             raise UserError(400, 'Bad request')
 
+        obj = cls._api_retrieve(id)
+
         if amount is None:
             amount = obj.amount
 
         amount = try_convert_to_int(amount)
-        
-        try:
-            obj = cls._api_retrieve(id)
-        except UserError:
-            return mock_source_object(amount,True)
-        
-
-        
         try:
             assert type(amount) is int and 0 <= amount <= obj.amount
             assert obj.captured is False
