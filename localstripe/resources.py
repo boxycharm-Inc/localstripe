@@ -121,6 +121,7 @@ def try_convert_to_float(arg):
 
 extra_apis = []
 
+
 class StripeObject(object):
     object = None
 
