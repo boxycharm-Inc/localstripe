@@ -79,7 +79,7 @@ def mock_source_object(amount,capture):
         card = "card_" + random_id(24)
         customer_id = "cus_" + random_id(14)
         fingerprint = random_id(16)
-        last4 = random_num(16)
+        last4 = random_num(4)
         curlResponse = {"id": id,"object": "charge","amount": try_convert_to_int(amount),"amount_refunded": 0,"application": None,"application_fee": None, "application_fee_amount": None,"balance_transaction": None,"billing_details": { "address": { "city": "Buffalo", "country": "US","line1": "840 aero drive", "line2": "", "postal_code": "14225", "state": "43" }, "email": None, "name": "Boxy Charm", "phone": None }, "calculated_statement_descriptor": "BOXYCHARM*", "captured": try_convert_to_bool(capture), "created": int(time.time()), "currency": "usd", "customer": customer_id, "description": None, "destination": None, "dispute": None, "disputed": False, "failure_code": None, "failure_message": None, "fraud_details": { }, "invoice": None, "livemode": False, "metadata": { }, "on_behalf_of": None, "order": None, "outcome": { "network_status": "approved_by_network", "reason": None, "risk_level": "normal", "risk_score": 19, "seller_message": "Payment complete.", "type": "authorized" }, "paid": True, "payment_intent": None, "payment_method": card, "payment_method_details": { "card": { "brand": "visa", "checks": { "address_line1_check": "pass", "address_postal_code_check": "pass", "cvc_check": None }, "country": "US", "exp_month": 12, "exp_year": 2024, "fingerprint": fingerprint, "funding": "credit", "installments": None, "last4": last4, "network": "visa", "three_d_secure": None, "wallet": None }, "type": "card" }, "receipt_email": None, "receipt_number": None, "receipt_url": None, "refunded": False, "refunds": { "object": "list", "data": [], "has_more": False, "total_count": 0, "url": "/v1/charges/ch_1HHtg2K8VCYMeauJeWq3PO3p/refunds" }, "review": None, "shipping": None, "source": { "id": card, "object": "card", "address_city": "Buffalo", "address_country": "US", "address_line1": "840 aero drive", "address_line1_check": "pass", "address_line2": "", "address_state": "43", "address_zip": "14225", "address_zip_check": "pass", "brand": "Visa", "country": "US", "customer": customer_id, "cvc_check": None, "dynamic_last4": None, "exp_month": 3, "exp_year": 2022, "fingerprint": fingerprint, "funding": "credit", "last4": "4242", "metadata": { }, "name": "Boxy Charm", "tokenization_method": None }, "source_transfer": None, "statement_descriptor": "Boxycharm*", "statement_descriptor_suffix": None, "status": "succeeded", "transfer_data": None, "transfer_group": None}
         return json.loads(json.dumps(curlResponse))
 
@@ -442,7 +442,7 @@ class Charge(StripeObject):
         obj = super()._api_create(**data)
         
         #sleep for 500ms for every charge create
-        time.sleep(0.5)
+        #time.sleep(0.5)
 
         amount = try_convert_to_int(data.get('amount','100'))
         capture = try_convert_to_bool(data.get('capture','false'))
@@ -472,7 +472,7 @@ class Charge(StripeObject):
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
         
         #sleep for 300ms for every capture
-        time.sleep(0.3)
+        #time.sleep(0.3)
         
         # return mock response for existing customer where card or customer data does not exists
         if mock_response is True:
